@@ -10,28 +10,40 @@ import java.util.Scanner;
 
 public class Client {
 
+	static DataInputStream dis = null;
+
 	public static void main(String[] args) {
-		DataInputStream dis = null;
 		DataOutputStream dos = null;
 		Socket socket = null;
-		String s = null;
+		String str = null;
+		Scanner input = new Scanner(System.in);
 		try {
 			socket = new Socket("127.0.0.1", 8888);
-			String str = null;
-			Scanner input = new Scanner(System.in);
 			do {
 				dis = new DataInputStream(socket.getInputStream());
 				dos = new DataOutputStream(socket.getOutputStream());
+				//匿名内部类
+				new Thread() {
+					@Override
+					public void run() {
+						String s = null;
+						try {
+							if ((s = dis.readUTF()) != null) {
+								System.out.println(s);
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}.start();
+
 				str = input.nextLine();
 				dos.writeUTF(str);
-				if ((s = dis.readUTF()) != null) {
-					System.out.println(s);
-				}			
-				} while (str != "88");
+			} while (!str.equals("88"));
 			System.out.println("用户端关闭！");
 
 		} catch (IOException e) {
-			System.out.println("用户端关闭！");
+			e.printStackTrace();
 		} finally {
 			try {
 				dis.close();
